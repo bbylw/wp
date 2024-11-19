@@ -10,9 +10,12 @@
     <div class="container">
       <h1>文档转图片工具</h1>
       <div class="input-area">
-        <textarea id="textInput" placeholder="在此输入文字..."></textarea>
+        <textarea
+          id="textInput"
+          placeholder="在此输入文字...&#10;&#10;使用说明：&#10;1. 直接输入文字，会实时预览效果&#10;2. 空行将自动分段&#10;3. 支持自动首行缩进和段落间距"
+        ></textarea>
         <div class="controls">
-          <button id="generateBtn">生成图片</button>
+          <button id="generateBtn">重新生成</button>
           <button id="downloadBtn">下载图片</button>
         </div>
       </div>
