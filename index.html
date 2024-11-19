@@ -5,21 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>文档转图片工具</title>
     <link rel="stylesheet" href="style.css" />
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   </head>
   <body>
     <div class="container">
       <h1>文档转图片工具</h1>
-      <div class="input-area">
-        <textarea
-          id="textInput"
-          placeholder="在此输入文字...&#10;&#10;使用说明：&#10;1. 直接输入文字，会实时预览效果&#10;2. 空行将自动分段&#10;3. 支持自动首行缩进和段落间距"
-        ></textarea>
+      <div class="editor-container">
+        <div id="editor" class="editor" contenteditable="true">
+          <p>在这里输入文字...</p>
+        </div>
         <div class="controls">
-          <button id="generateBtn">重新生成</button>
+          <button id="generateBtn">生成图片</button>
           <button id="downloadBtn">下载图片</button>
         </div>
       </div>
-      <div class="preview-area">
+      <div id="preview" class="preview-area">
         <canvas id="canvas"></canvas>
       </div>
     </div>
