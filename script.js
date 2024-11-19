@@ -23,21 +23,47 @@ document.addEventListener('DOMContentLoaded', () => {
     // 设置段落样式
     function setParagraphStyle(style) {
         const selection = window.getSelection();
-        const currentNode = selection.anchorNode;
-        const paragraph = currentNode.nodeType === 1 ? currentNode : currentNode.parentNode;
-        
-        if (paragraph.tagName === 'P') {
-            // 移除所有样式类
-            paragraph.classList.remove('title', 'normal');
-            // 添加新样式类
-            paragraph.classList.add(style);
-            
-            // 根据样式类型设置缩进
-            if (style === 'title') {
-                paragraph.style.textIndent = '0';
-            } else {
-                paragraph.style.textIndent = '2em';
+        if (selection.rangeCount === 0) return;
+
+        const range = selection.getRangeAt(0);
+        if (range.collapsed) {
+            // 如果没有选中文本，处理当前段落
+            const currentNode = range.startContainer;
+            const paragraph = currentNode.nodeType === 1 ? currentNode : currentNode.parentNode;
+            if (paragraph.tagName === 'P') {
+                updateParagraphStyle(paragraph, style);
             }
+        } else {
+            // 如果选中了文本，创建新段落
+            const content = range.extractContents();
+            const newP = document.createElement('p');
+            newP.appendChild(content);
+            updateParagraphStyle(newP, style);
+            range.insertNode(newP);
+            
+            // 清理选区
+            selection.removeAllRanges();
+            const newRange = document.createRange();
+            newRange.selectNodeContents(newP);
+            selection.addRange(newRange);
+        }
+    }
+
+    // 更新段落样式
+    function updateParagraphStyle(paragraph, style) {
+        paragraph.className = style;
+        if (style === 'title') {
+            paragraph.style.textIndent = '0';
+            paragraph.style.textAlign = 'center';
+            paragraph.style.fontSize = '32px';
+            paragraph.style.fontWeight = 'bold';
+            paragraph.style.marginBottom = '1.2em';
+        } else {
+            paragraph.style.textIndent = '2em';
+            paragraph.style.textAlign = 'left';
+            paragraph.style.fontSize = '18px';
+            paragraph.style.fontWeight = 'normal';
+            paragraph.style.marginBottom = '1em';
         }
     }
 
@@ -58,47 +84,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // 处理回车键
     editor.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
-            if (e.shiftKey) {
-                // Shift + Enter 插入换行符
-                e.preventDefault();
-                document.execCommand('insertText', false, '\n');
-            } else {
-                // 普通回车创建新段落
-                e.preventDefault();
-                const selection = window.getSelection();
-                const range = selection.getRangeAt(0);
-                const currentNode = range.startContainer;
-                const currentParagraph = currentNode.closest('p') || currentNode;
-                
-                // 创建新段落
-                const newP = document.createElement('p');
-                newP.classList.add('normal'); // 默认使用正文样式
-                
-                // 如果当前段落是标题，新段落不需要缩进
-                if (currentParagraph.classList.contains('title')) {
-                    newP.style.textIndent = '2em'; // 标题后的段落需要缩进
-                }
-                
-                // 分割文本
-                if (range.collapsed && currentNode.textContent.length === range.startOffset) {
-                    // 在段落末尾按回车
-                    currentParagraph.parentNode.insertBefore(newP, currentParagraph.nextSibling);
-                } else {
-                    // 在段落中间按回车
-                    const secondHalf = range.extractContents();
-                    newP.appendChild(secondHalf);
-                    currentParagraph.parentNode.insertBefore(newP, currentParagraph.nextSibling);
-                }
-                
-                // 移动光标到新段落
-                range.selectNodeContents(newP);
-                range.collapse(true);
-                selection.removeAllRanges();
-                selection.addRange(range);
-                
-                // 更新按钮状态
-                normalBtn.classList.add('active');
-                titleBtn.classList.remove('active');
+            e.preventDefault();
+            
+            // 创建新段落
+            const newP = document.createElement('p');
+            updateParagraphStyle(newP, 'normal');
+            
+            // 插入新段落
+            document.execCommand('insertParagraph', false);
+            
+            // 确保新段落有正确的样式
+            const selection = window.getSelection();
+            const currentNode = selection.anchorNode;
+            const currentParagraph = currentNode.nodeType === 1 ? currentNode : currentNode.parentNode;
+            if (currentParagraph.tagName === 'P') {
+                updateParagraphStyle(currentParagraph, 'normal');
             }
         }
     });

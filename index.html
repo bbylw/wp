@@ -12,11 +12,23 @@
       <h1>文档转图片工具</h1>
       <div class="editor-container">
         <div class="toolbar">
-          <button id="titleBtn">标题文字</button>
-          <button id="normalBtn">正文文字</button>
+          <button id="titleBtn" title="选中文字后点击设置为标题">
+            标题文字
+          </button>
+          <button id="normalBtn" title="选中文字后点击设置为正文">
+            正文文字
+          </button>
+        </div>
+        <div class="instructions">
+          <p>使用说明：</p>
+          <ol>
+            <li>输入或粘贴文字</li>
+            <li>选中文字后，点击"标题文字"或"正文文字"设置样式</li>
+            <li>按 Enter 键换行</li>
+          </ol>
         </div>
         <div id="editor" class="editor" contenteditable="true">
-          <p>在这里输入文字...</p>
+          <p class="normal">在这里输入文字...</p>
         </div>
         <div class="controls">
           <button id="generateBtn">生成图片</button>

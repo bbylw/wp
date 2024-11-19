@@ -138,4 +138,27 @@ canvas {
     font-weight: normal;
     margin-bottom: 1em;
     text-indent: 2em;
+}
+
+/* 添加使用说明样式 */
+.instructions {
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 14px;
+    color: #666;
+}
+
+.instructions p {
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.instructions ol {
+    padding-left: 20px;
+    margin: 0;
+}
+
+.instructions li {
+    margin-bottom: 4px;
 } 
