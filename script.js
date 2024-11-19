@@ -19,43 +19,72 @@ document.addEventListener('DOMContentLoaded', () => {
         document.execCommand('insertText', false, text);
     });
 
-    // 处理回车键，自动创建新段落
-    editor.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            document.execCommand('insertParagraph', false);
-            // 为新段落添加缩进
-            const selection = window.getSelection();
+    // 应用字体大小到选中文本
+    function applyFontSize(size) {
+        const selection = window.getSelection();
+        if (!selection.isCollapsed) {
+            // 有文本选中的情况
             const range = selection.getRangeAt(0);
-            const newP = range.startContainer.parentElement;
-            if (newP.tagName === 'P') {
-                newP.style.textIndent = '2em';
+            const span = document.createElement('span');
+            span.style.fontSize = `${size}px`;
+            range.surroundContents(span);
+        } else {
+            // 没有选中文本，应用到当前段落
+            const currentNode = selection.anchorNode;
+            const paragraph = currentNode.nodeType === 1 ? currentNode : currentNode.parentNode;
+            if (paragraph.tagName === 'P') {
+                paragraph.style.fontSize = `${size}px`;
             }
         }
-    });
-
-    // 确保每个段落都有缩进
-    const ensureParagraphStyle = () => {
-        const paragraphs = editor.getElementsByTagName('p');
-        for (let p of paragraphs) {
-            p.style.textIndent = '2em';
-        }
-    };
-
-    // 初始化编辑器样式
-    editor.innerHTML = '<p>在这里输入文字...</p>';
-    ensureParagraphStyle();
+    }
 
     // 处理字体大小变化
     fontSizeSelect.addEventListener('change', () => {
         const size = fontSizeSelect.value;
-        document.execCommand('fontSize', false, '7');
-        const selected = document.getSelection().getRangeAt(0);
-        const span = selected.startContainer.parentElement;
-        if (span.tagName === 'FONT') {
-            span.style.fontSize = `${size}px`;
+        applyFontSize(size);
+    });
+
+    // 处理回车键，自动创建新段落
+    editor.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            const currentNode = range.startContainer;
+            const currentParagraph = currentNode.closest('p') || currentNode;
+            const currentSize = window.getComputedStyle(currentParagraph).fontSize;
+            
+            // 插入新段落
+            const newP = document.createElement('p');
+            newP.style.textIndent = '2em';
+            newP.style.fontSize = currentSize; // 继承当前段落的字体大小
+            
+            // 如果光标在段落末尾，直接添加新段落
+            if (range.collapsed && currentNode.textContent.length === range.startOffset) {
+                currentParagraph.parentNode.insertBefore(newP, currentParagraph.nextSibling);
+            } else {
+                // 否则分割当前段落
+                const secondHalf = range.extractContents();
+                newP.appendChild(secondHalf);
+                currentParagraph.parentNode.insertBefore(newP, currentParagraph.nextSibling);
+            }
+            
+            // 将光标移动到新段落
+            range.selectNodeContents(newP);
+            range.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(range);
         }
     });
+
+    // 初始化编辑器样式
+    function initializeEditor() {
+        const p = document.createElement('p');
+        p.style.fontSize = `${fontSizeSelect.value}px`;
+        p.style.textIndent = '2em';
+        editor.innerHTML = '';
+        editor.appendChild(p);
+    }
 
     // 生成图片
     async function generateImage() {
@@ -71,11 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
             tempContainer.style.position = 'absolute';
             tempContainer.style.left = '-9999px';
             
-            // 复制编辑器内容，但移除末尾空段落
-            let content = editor.innerHTML;
-            content = content.replace(/<p>\s*<\/p>\s*$/, '');
-            tempContainer.innerHTML = content;
-            
+            // 复制编辑器内容，保留样式
+            tempContainer.innerHTML = editor.innerHTML;
             document.body.appendChild(tempContainer);
 
             // 计算实际内容高度
@@ -108,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 下载图片
     function downloadImage() {
         const canvas = preview.querySelector('canvas');
         if (!canvas) {
@@ -133,24 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
     generateBtn.addEventListener('click', generateImage);
     downloadBtn.addEventListener('click', downloadImage);
 
-    // 处理选中文本的字体大小
-    editor.addEventListener('mouseup', () => {
-        const selection = window.getSelection();
-        if (!selection.isCollapsed) {
-            const range = selection.getRangeAt(0);
-            const span = document.createElement('span');
-            span.style.fontSize = `${fontSizeSelect.value}px`;
-            range.surroundContents(span);
-        }
-    });
-
-    // 修改初始化编辑器内容的处理
+    // 清除编辑器初始内容
     editor.addEventListener('focus', function() {
         if (this.innerHTML === '<p>在这里输入文字...</p>') {
-            this.innerHTML = '';
-            const p = document.createElement('p');
-            p.style.fontSize = `${fontSizeSelect.value}px`;
-            this.appendChild(p);
+            initializeEditor();
         }
     });
 
