@@ -3,48 +3,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateBtn = document.getElementById('generateBtn');
     const downloadBtn = document.getElementById('downloadBtn');
     const preview = document.getElementById('preview');
-    const fontSizeSelect = document.getElementById('fontSize');
+    const titleBtn = document.getElementById('titleBtn');
+    const normalBtn = document.getElementById('normalBtn');
 
-    // 检查 html2canvas 是否正确加载
+    // 检查 html2canvas 加载
     if (typeof html2canvas === 'undefined') {
         console.error('html2canvas 未能正确加载');
         alert('页面资源加载失败，请刷新页面重试');
         return;
     }
 
-    // 处理编辑器的粘贴事件，确保粘贴的是纯文本
+    // 处理粘贴事件
     editor.addEventListener('paste', (e) => {
         e.preventDefault();
         const text = e.clipboardData.getData('text/plain');
         document.execCommand('insertText', false, text);
     });
 
-    // 应用字体大小到选中文本
-    function applyFontSize(size) {
+    // 设置段落样式
+    function setParagraphStyle(style) {
         const selection = window.getSelection();
-        if (!selection.isCollapsed) {
-            // 有文本选中的情况
-            const range = selection.getRangeAt(0);
-            const span = document.createElement('span');
-            span.style.fontSize = `${size}px`;
-            range.surroundContents(span);
-        } else {
-            // 没有选中文本，应用到当前段落
-            const currentNode = selection.anchorNode;
-            const paragraph = currentNode.nodeType === 1 ? currentNode : currentNode.parentNode;
-            if (paragraph.tagName === 'P') {
-                paragraph.style.fontSize = `${size}px`;
-            }
+        const currentNode = selection.anchorNode;
+        const paragraph = currentNode.nodeType === 1 ? currentNode : currentNode.parentNode;
+        
+        if (paragraph.tagName === 'P') {
+            // 移除所有样式类
+            paragraph.classList.remove('title', 'normal');
+            // 添加新样式类
+            paragraph.classList.add(style);
         }
     }
 
-    // 处理字体大小变化
-    fontSizeSelect.addEventListener('change', () => {
-        const size = fontSizeSelect.value;
-        applyFontSize(size);
+    // 标题按钮点击事件
+    titleBtn.addEventListener('click', () => {
+        setParagraphStyle('title');
+        titleBtn.classList.add('active');
+        normalBtn.classList.remove('active');
     });
 
-    // 处理回车键，自动创建新段落
+    // 正文按钮点击事件
+    normalBtn.addEventListener('click', () => {
+        setParagraphStyle('normal');
+        normalBtn.classList.add('active');
+        titleBtn.classList.remove('active');
+    });
+
+    // 处理回车键
     editor.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -52,38 +56,40 @@ document.addEventListener('DOMContentLoaded', () => {
             const range = selection.getRangeAt(0);
             const currentNode = range.startContainer;
             const currentParagraph = currentNode.closest('p') || currentNode;
-            const currentSize = window.getComputedStyle(currentParagraph).fontSize;
             
-            // 插入新段落
+            // 创建新段落
             const newP = document.createElement('p');
+            newP.classList.add('normal'); // 默认使用正文样式
             newP.style.textIndent = '2em';
-            newP.style.fontSize = currentSize; // 继承当前段落的字体大小
             
-            // 如果光标在段落末尾，直接添加新段落
             if (range.collapsed && currentNode.textContent.length === range.startOffset) {
                 currentParagraph.parentNode.insertBefore(newP, currentParagraph.nextSibling);
             } else {
-                // 否则分割当前段落
                 const secondHalf = range.extractContents();
                 newP.appendChild(secondHalf);
                 currentParagraph.parentNode.insertBefore(newP, currentParagraph.nextSibling);
             }
             
-            // 将光标移动到新段落
+            // 移动光标到新段落
             range.selectNodeContents(newP);
             range.collapse(true);
             selection.removeAllRanges();
             selection.addRange(range);
+            
+            // 更新按钮状态
+            normalBtn.classList.add('active');
+            titleBtn.classList.remove('active');
         }
     });
 
-    // 初始化编辑器样式
+    // 初始化编辑器
     function initializeEditor() {
         const p = document.createElement('p');
-        p.style.fontSize = `${fontSizeSelect.value}px`;
+        p.classList.add('normal');
         p.style.textIndent = '2em';
         editor.innerHTML = '';
         editor.appendChild(p);
+        normalBtn.classList.add('active');
     }
 
     // 生成图片
@@ -165,6 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 初始禁用下载按钮
-    downloadBtn.disabled = true;
+    // 初始化
+    normalBtn.classList.add('active');
 }); 

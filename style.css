@@ -99,16 +99,41 @@ canvas {
     padding: 10px 20px;
     background: #f8f9fa;
     border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    gap: 10px;
 }
 
-select {
-    padding: 5px 10px;
+.toolbar button {
+    padding: 8px 15px;
+    background: #f0f0f0;
+    color: #333;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 14px;
     cursor: pointer;
+    font-size: 14px;
 }
 
-.editor p:last-child {
-    margin-bottom: 0;
+.toolbar button:hover {
+    background: #e0e0e0;
+    transform: none;
+}
+
+.toolbar button.active {
+    background: #007bff;
+    color: white;
+    border-color: #0056b3;
+}
+
+/* 标题样式 */
+.editor p.title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 1.5em;
+}
+
+/* 正文样式 */
+.editor p.normal {
+    font-size: 18px;
+    font-weight: normal;
+    margin-bottom: 1em;
 } 
