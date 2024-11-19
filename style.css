@@ -36,8 +36,7 @@ h1 {
     padding: 40px;
     background: #fff9f0;
     border: 1px solid #e0e0e0;
-    font-size: 18px;
-    line-height: 1.8;
+    line-height: 2;
     color: #2c3e50;
     white-space: pre-wrap;
 }
@@ -126,9 +125,11 @@ canvas {
 
 /* 标题样式 */
 .editor p.title {
-    font-size: 24px;
+    font-size: 32px;
     font-weight: bold;
-    margin-bottom: 1.5em;
+    margin-bottom: 1.2em;
+    text-indent: 0;
+    text-align: center;
 }
 
 /* 正文样式 */
@@ -136,4 +137,5 @@ canvas {
     font-size: 18px;
     font-weight: normal;
     margin-bottom: 1em;
+    text-indent: 2em;
 } 
